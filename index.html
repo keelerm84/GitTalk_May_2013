@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>reveal.js - The HTML Presentation Framework</title>
+
+        <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+        <meta name="author" content="Hakim El Hattab">
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="css/reveal.min.css">
+        <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+        <!-- For syntax highlighting -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+        <script>
+            document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+
+        <div class="reveal">
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+
+                <section>
+                    <h1>Git Part II</h1>
+                    <h2>The Origin of Master</h2>
+                    <p>
+                    <small><a href="http://tortugas-llc.com">Matthew M. Keeler</a> / <a href="http://twitter.com/keelerm84">@keelerm84</a></small>
+                </p></small>
+                </section>
+
+                <section>
+                    <h2>What We'll Cover</h2>
+                    <ul>
+                        <li>The first talk covered working with git locally.</li>
+                        <li>You can watch the first talk at <a href="http://www.youtube.com/watch?v=znilVsDph38">http://www.youtube.com/watch?v=znilVsDph38</a></li>
+                        <li>This talk will be geared towards working with remote repositories, with an eye towards team development.</li>
+                    </ul>
+                </section>
+                <!--Init Bare-->
+                <section>
+                    <section>
+                        <h2>Git Init</h2>
+                        <ul>
+                            <li>When working locally, we can initialize a repo with git init</li>
+                            <li>
+                            <pre><code>$ git init our_repo
+$ ls -a our_repo
+.   ..  .git
+$ ls -a our_repo/.git
+.       HEAD        config      hooks       objects
+..      branches    description info        refs</code></pre>
+                            </li>
+                            <li>What if we want a remote repository that we can share with others?</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Bare Repositories</h2>
+                        <ul>
+                            <li>A bare repository is one without a working checkout of the files</li>
+                            <li>These types of repositories are setup for developers to push commits to</li>
+                            <li>
+                            <pre><code>$ git init --bare
+$ ls -a our_bare_repo
+.       HEAD        config      hooks       objects
+..      branches    description info        refs</code></pre>
+                            </li>
+                            <li>The created files are the same as the contents of the .git folder in a normal repository</li>
+                            <li>Bare repositories are not necessary to receive pushes, but they are way simpler and much safer</li>
+                        </ul>
+                    </section>
+                </section>
+                <!--Clone-->
+                <section>
+                    <h2>Git Clone</h2>
+                    <ul>
+                        <li>In order to get a copy of a repository, we have to clone it</li>
+                        <li><pre><code>$ git clone ssh://user@host/path/to/our_bare_repo local_repo_name
+Cloning into 'local_repo_name'...
+remote: Counting objects: 4287, done.
+remote: Compressing objects: 100% (2385/2385), done.
+remote: Total 4287 (delta 1791), reused 4258 (delta 1762)
+Receiving objects: 100% (4287/4287), 6.28 MiB | 875 KiB/s, done.
+Resolving deltas: 100% (1791/1791), done.</code></pre></li>
+                        <li>Note that this method requires an account on the server.</li>
+                        <li>You can also setup a git server that will allow for cloning over https or using git's native protocol.</li>
+                    </ul>
+                </section>
+                <!--Remotes-->
+                <section>
+                    <section>
+                        <h2>Remotes</h2>
+                        <ul>
+                            <li>Remotes are references to server/repo pairs you can use to push/pull from</li>
+                            <li>When cloning a repo, you are automatically setup with a remote, called origin</li>
+                            <li><pre><code>$ git remote -v
+origin  https://github.com/git/git.git (fetch)
+origin  https://github.com/git/git.git (push)</code></pre></li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Adding Remotes</h2>
+                        <ul>
+                            <li>Because git is a distributed system, you are not limited to the central server.</li>
+                            <li>If you want to be able to pull from another developer's system, you just add a new remote.</li>
+                            <li><pre><code>$ git remote add keelerm https://github.com/keelerm84/git.git</code></pre></li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Renaming / Removing Remotes</h2>
+                        <ul>
+                            <li>You can rename an existing remote with <pre><code>$ git remote rename origin parent</code></pre></li>
+                            <li>When you are done with a remote, you can delete it with <pre><code>$ git remote rm parent</code></pre></li>
+                        </ul>
+                    </section>
+                </section>
+                <!--fetch-->
+                <section>
+                    <section>
+                        <h2>Remote Branches</h2>
+                        <ul>
+                            <li>If you look at the current branches, you'll find we only have master</li>
+                            <li><pre><code>$ git branch -a
+* master</code></pre></li>
+                            <li>But we know there are more branches available than that, so where are they?</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Fetch</h2>
+                        <ul>
+                            <li>We have to tell git to retrieve those remote references through use of the fetch command.</li>
+                            <li><pre><code>$ git fetch origin
+From https://github.com/git/git
+ * [new branch]      maint      -> origin/maint
+ * [new branch]      master     -> origin/master
+ * [new branch]      next       -> origin/next
+ * [new branch]      pu         -> origin/pu
+ * [new branch]      todo       -> origin/todo</code></pre></li>
+                            <li><pre><code>$ git branch -a
+* master
+  remotes/origin/maint
+  remotes/origin/master
+  remotes/origin/next
+  remotes/origin/pu
+  remotes/origin/todo</code></pre></li>
+                        </ul>
+                    </section>
+                </section>
+                <!--Checkout remote branch-->
+                <section>
+                    <h2>Remote Branches</h2>
+                    <ul>
+                        <li>After cloning, you can start working on the project immediately</li>
+                        <li>What if you want to work on another branch?</li>
+                        <li>We can checkout a remote branch with <pre><code>$ git checkout -b next origin/next
+Branch next set up to track remote branch next from origin.
+Switched to a new branch 'next'</code></pre></li>
+                    </ul>
+                </section>
+                <!--Pull-->
+                <section>
+                    <section>
+                        <h2>Pull</h2>
+                        <ul>
+                            <li>As other developers commit changes, we can pull them into our local repository.</li>
+                            <li><pre><code>$ git pull origin next</code></pre></li>
+                            <li>We can pull from any remote, from any branch, with this format.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Tracked Branches</h2>
+                        <ul>
+                            <li>Branches checked out from a remote are initially set to track that branch ( by default )</li>
+                            <li>This allows you to pull using the shorthand notation <pre><code>$ git pull</code></pre></li>
+                            <li>To explicitly set a branch to track another, <pre><code>$ git checkout -b --track local_branch remote/branch</code></pre></li>
+                            <li>To prevent tracking, you can use the option <pre><code>--no-track</code></pre></li>
+                            <li>Default behavior can be set with <pre><code>$ git config --global branch.autosetupmerge [true|false|always]</code></pre></li>
+                        </ul>
+                    </section>
+                </section>
+                <!--Push-->
+                <section>
+                    <h2>Push</h2>
+                    <ul>
+                        <li>When we are ready to share our work, we can push our commits to a remote repository</li>
+                        <li>Much like pull, we can explicitly push to a remote branch</li>
+                        <li><pre><code>$ git push origin local_next:next</code></pre></li>
+                        <li>If the remote branch name is the same as the current branch: <pre><code>$ git push origin next</code></pre></li>
+                        <li>You can set the branch to be tracked for pushes with <pre><code>$ git push -u origin next</code></pre></li>
+                        <li>A similar format can be used to delete a remote branch <pre><code>$ git push origin :next</code></pre></li>
+                    </ul>
+                </section>
+                <!--Tags-->
+                <section>
+                    <section>
+                        <h2>Tags</h2>
+                        <ul>
+                            <li>Tags are markers to specific commits.</li>
+                            <li>Prevents us from having to remember specific SHA1</li>
+                            <li>We can review the list of existing tags</li>
+                            <li><pre><code>$ git tag
+v1.8.3-rc3
+v1.8.3-rc2
+v1.8.3-rc1</code></pre></li>
+                            <li>You can search for a specific tag with <pre><code>$ git tag -l 'regex'</code></pre></li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Lightweight vs. Annotated</h2>
+                        <ul>
+                            <li>Lightweight tags are nothing more than simple markers, just a file containing the SHA1 of a commit
+                            <pre><code>$ git tag temp_tag HEAD</code></pre>
+                            </li>
+                            <li>Annotated tags are full commit objects</li>
+                            <li><pre><code>$ git tag -a -m 'Tagging v.1.8.4' v1.8.4 HEAD</code></pre></li>
+                            <li>We can share those tags with <pre><code>$ git push --tags</code></pre></li>
+                            <li>Retrieve new tags with <pre><code>$ git fetch --tags</code></pre></li>
+                        </ul>
+                    </section>
+                </section>
+                <!--Merging in Changes-->
+                <section>
+                    <h2>Merging Changes</h2>
+                    <ul>
+                        <li>When working with branches, merging is inevitable</li>
+                        <li>Like most everything with git, there are a couple ways to accomplish this</li>
+                        <li>
+                            <ul>
+                                <li><code>git merge</code></li>
+                                <li><code>git rebase</code></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
+                <!--Straight Merge-->
+                <section>
+                    <section>
+                        <h2>Merge</h2>
+                        <ul>
+                            <li>When you have done work on a separate branch, your work may look similar to the following</li>
+                        </ul>
+                        <img alt="Diverged work" src="img/diverged.png" />
+                    </section>
+
+                    <section>
+                        <h2>Merge It!</h2>
+                        <ul>
+                            <li>We can switch to the master branch and issue a <pre><code>$ git merge experiment</code></pre></li>
+                            <li>This looks for the common point between the branches, and adds a new commit that is a merge of the two paths</li>
+                        </ul>
+                        <img alt="Merging in Experiement" src="img/merged.png" />
+                    </section>
+
+                    <section>
+                        <h2>Pros and Cons</h2>
+                        <ul>
+                            <li>This is always an available option, so if you remember only one method, make it this one</li>
+                            <li>Easy to understand, but difficult to review the history as commits have two parents</li>
+                        </ul>
+                    </section>
+                </section>
+                <!--Rebase-->
+                <section>
+                    <section>
+                        <h2>Rebase</h2>
+                        <ul>
+                            <li>Merging melds two branches into one, but rebase takes a different approach</li>
+                            <li>It tries to replay your work on top of existing commits, even though they weren't developed that way.</li>
+                        </ul>
+                        <img alt="Diverged work" src="img/diverged.png" />
+                    </section>
+
+                    <section>
+                        <h2>Rebase It!</h2>
+                        <ul>
+                            <li>To rebase these commits, from the experiment branch, we issue <pre><code>$ git rebase master</code></pre></li>
+                            <li>This stashes the commits on our local branch (experiment), going back to the common point of master</li>
+                            <li>The new commits from master are brought in, so master and experiment are identical</li>
+                            <li>The stashed commits are applied ontop of the new master commits.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Pros and Cons</h2>
+                        <ul>
+                            <li>Rebasing gives us a nice linear history, making later review easy</li>
+                            <li>Takes a few extra steps, but well worth it.</li>
+                            <li>This should <strong>never</strong> be done with commits already shared</li>
+                        </ul>
+                        <img alt="Rebased work" src="img/rebased.png" />
+                    </section>
+                </section>
+                <!--Complicated Rebase-->
+                <section>
+                    <section>
+                        <h2>A More Complicated Rebase</h2>
+                        <ul>
+                            <li>A rebase doesn't have to only involve two branches.  It may include 3!</li>
+                            <li>This is where <code>git rebase --onto</code> comes in</li>
+                        </ul>
+                        <img alt="Complicated Diverge" src="img/complicated-diverged.png" />
+                    </section>
+
+                    <section>
+                        <h2>What Are You Doing?</h2>
+                        <ul>
+                            <li>Let's say you wanted to bring your client commits back into the mainline</li>
+                            <li>But we don't want to bring in any of the server commits yet because they aren't done</li>
+                            <li><pre><code>$ git rebase --onto master server client</code></pre></li>
+                            <li>This tells git to find the commits since the common point of server and client, and rebase those onto master</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>The Result?</h2>
+                        <img alt="Complicated Rebase Result" src="img/rebased-onto.png" />
+                        <p>We can finish this up by mering client into master to fast-forward master to C9'</p>
+                    </section>
+                </section>
+                    <!--<p>-->
+                        <!--You can issue a merge-->
+                        <!--Or you can use rebase:-->
+                            <!--git checkout experimental-->
+                            <!--git rebase master-->
+                            <!--git checkout master-->
+                            <!--git merge experimental-->
+                        <!--You can also rebase like this:-->
+                            <!--git rebase basebranch topicbranch-->
+                                <!--(so you can git rebase master experimental)-->
+                        <!--* Remember to never rebase publically shared commits because it discards old commits and adds new ones.-->
+                    <!--</p>-->
+                <!--Stash-->
+                <section>
+                    <section>
+                        <h2>Switching Gears</h2>
+                        <ul>
+                            <li>Sometimes you're working on an issue, and something urgent comes up.</li>
+                            <li>With a dirty working directory, you have a couple of options</li>
+                            <li>You can commit your current work, and then <code>--amend</code> it later</li>
+                            <li>Or you can stash your current work, and restore it later.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Stash</h2>
+                        <ul>
+                            <li>To store the current working directory: <pre><code>$ git stash</code></pre></li>
+                            <li>This adds the changes to a <em>stack</em></li>
+                            <li>You can specify a message when stashing with <pre><code>$ git stash save 'Some pithy message'</code></pre></li>
+                            <li>Additional flags
+                                <ul>
+                                    <li>--patch Allows you to interactively stage portions of the file</li>
+                                    <li>--keep-index Any changes already added to the index will kept after performing the stash</li>
+                                    <li>--include-tracked This will include any untracked files in the stash</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Review Stashes</h2>
+                        <ul>
+                            <li>You can review your list of stashes with <pre><code>$ git stash list
+stash@{0}: WIP on next: ea353ce Sync with 1.8.3</code></pre></li>
+                            <li>Stashes are referenced by their stash name (e.g. stash@{0})</li>
+                            <li>You can apply a stash with <pre><code>$ git stash apply stash@{0}</code></pre></li>
+                            <li>This leaves the stash on the stack.  You can remove a stash with <pre><code>$ git stash drop stash@{0}</code></pre></li>
+                            <li>You can apply and drop with <pre><code>$ git stash pop stash@{0}</code></pre></li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Convenient Applys</h2>
+                        <ul>
+                            <li>By default, applying a stash removes all files from the index, and applies them to the working directory.</li>
+                            <li><pre><code>$ git stash apply --index</code></pre> will store the working directory and index as it was during the stash</li>
+                            <li>You can also create a branch from a stash with <pre><code>$ git stash branch branch_name</code></pre></li>
+                        </ul>
+                    </section>
+                </section>
+                <!--pull \-\-rebase-->
+                <section>
+                    <section>
+                        <h2>Git Rebase (Again)</h2>
+                        <ul>
+                            <li>While working on a feature branch, you are likely to make a lot of smaller commits</li>
+                            <li>You can merge in all of those individual changes, but sometimes it can be better to only merge in one complete commit</li>
+                            <li>This can be accomplished through a particular use of rebase<pre><code>$ git rebase -i HEAD~4</code></pre></li>
+                            <li>This will open a buffer like the following</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Rebase Options</h2>
+                        <ul>
+                            <li><pre><code>pick e00dd1e describe: Add --first-parent option
+pick 66fa1b2 Documentation/merge-options.txt: restore `-e` option
+pick 7370445 completion: regression fix for zsh
+pick 92c4369 remote-hg: trivial configuration note cleanup
+pick 5e49f30 remote-hg: fix order of configuration comments
+pick edca415 Git 1.8.3
+
+# Rebase aed12a7..ea353ce onto aed12a7
+#
+# Commands:
+#  p, pick = use commit
+#  r, reword = use commit, but edit the commit message
+#  e, edit = use commit, but stop for amending
+#  s, squash = use commit, but meld into previous commit
+#  f, fixup = like "squash", but discard this commit's log message
+#  x, exec = run command (the rest of the line) using shell
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+#
+# If you remove a line here THAT COMMIT WILL BE LOST.
+# However, if you remove everything, the rebase will be aborted.</code></pre></li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Splitting a Commit</h2>
+                        <ul>
+                            <li>Individual commits should only contain one fix or feature.</li>
+                            <li>If you have commited too much, you can of course use reset, but that's really only efficient if it is the most recent commit</li>
+                            <li>Rebase can be used to more easily split commits past the first one</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Steps to Split Commits</h2>
+                        <ul>
+                            <li><code>git rebase -i SHA1</code></li>
+                            <li>Change pick to edit for the commit to split</li>
+                            <li>Issue a git reset to put the changes in the working directory.</li>
+                            <li>Restage and commit files as appropriate.</li>
+                            <li>When finished, <code>git rebase --continue</code></li>
+                        </ul>
+                    </section>
+                </section>
+                <!--cherry-pick-->
+                <section>
+                    <h2>Cherry Pick</h2>
+                    <ul>
+                        <li>There are times when you want to bring in specific commits from another branch ( local or remote )</li>
+                        <li>You can pull out these commits with <pre><code>$ git cherry-pick SHA1</code></pre></li>
+                        <li>A good use case for cherry-pick is if a branch has code you want to introduce, but the branch itself is quite dated.</li>
+                        <li>Cherry picking will take a commit, apply it to your system, and automatically make a new commit</li>
+                        <li>If you add the <code>-n</code> flag, this will stage the changes, but not automatically commit them.</li>
+                        <li>You can also cherry pick multiple commits at once by specifying individual SHAs, or a range selector</li>
+                    </ul>
+                </section>
+                <!--Blame-->
+                <section>
+                    <h2>Blame</h2>
+                    <ul>
+                        <li>When tracking down a bug, you might want to find out which commit introduced it so you'll have context when you fix it.</li>
+                        <li>You can look at which commit last touched a line with <pre><code>$ git blame /path/to/file</code></pre></li>
+                        <li>We can also look at a specific line range with <pre><code>$ git blame -L1,30 /path/to/file</code></pre></li>
+                    </ul>
+                    <pre><code>$ git blame -L9,13 /path/to/file
+35297089 (Jonathan Nieder         2013-03-09 14:00:11 -0800   9) #define NOLOGIN_COMMAND COMMAND_DIR "/no-interactive-login"
+2dbc887e (Greg Brockman           2010-07-28 17:31:01 -0700  10) 
+35eb2d36 (Linus Torvalds          2005-10-23 14:30:45 -0700  11) static int do_generic_cmd(const char *me, char *arg)
+35eb2d36 (Linus Torvalds          2005-10-23 14:30:45 -0700  12) {
+35eb2d36 (Linus Torvalds          2005-10-23 14:30:45 -0700  13)        const char *my_argv[4];</code></pre>
+                </section>
+                <!--Bisect-->
+                <section>
+                    <section>
+                        <h2>Bisect</h2>
+                        <ul>
+                            <li><code>git blame</code> shows us the last time the line was touched, but not necessarily who introduced an error.</li>
+                            <li>For this, we can use <code>git bisect</code></li>
+                            <li>Bisect works by performing a binary search through a range of commits, stopping at each point for you to review.</li>
+                            <li>Steps to performing a bisect
+                            <pre><code>$ git bisect start
+$ git bisect bad HEAD
+$ git bisect good SHA1 # Known working SHA1
+  # As git stops at each commit, check it for the error and mark it as good or bad
+$ git bisect [good|bad]
+  # If there is a commit you cannot determine, use 
+$ git bisect skip
+  # Once you have found the commit, you can exit the bisect with
+$ git bisect reset
+                            </code></pre>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Automated git bisect</h2>
+                        <ul>
+                            <li>You can automate the process by using the <code>run</code> flag</li>
+                            <li>You specify a script to run at every stopping point, and the exit status determines whether the test is good or bad</li>
+                            <li>Common commands/scripts would include running <code>make</code> or executing your test suite</li>
+                        </ul>
+                    </section>
+                </section>
+                <!--filter-branch-->
+                <section>
+                    <section>
+                        <h2>Purging a File</h2>
+                        <ul>
+                            <li>What do you do if you accidentally commit a file that should not be available in the repository?</li>
+                            <li><pre><code>$ git filter branch --tree-filter 'rm -f password' HEAD</code></pre></li>
+                            <li>This will completely purge the file from all commits in the current branch</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Retagging Commits</h2>
+                        <ul>
+                            <li>Another common use case is fixing invalid author emails</li>
+                            <li><pre><code>$ git filter-branch --commit-filter '
+if [ "$GIT_AUTHOR_EMAIL" = "keelerm@localhost" ];
+then
+        GIT_AUTHOR_NAME="Matthew M. Keeler";
+        GIT_AUTHOR_EMAIL="keelerm@tortugas-llc.com";
+        git commit-tree "$@";
+else
+        git commit-tree "$@";
+fi' HEAD</code></pre>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Warning</h2>
+                        <ul>
+                            <li>You can add the <code>--all</code> flag to run this purge command against all branches</li>
+                            <li>Be warned, this will change the SHAs of all prior commits, forcing you to push with force <pre><code>$ git push --force origin master</code></pre></li>
+                            <li>Other team members will have to drop their branches and pull in the re-worked branch</li>
+                        </ul>
+                    </section>
+                </section>
+                <!--Hooks-->
+                <section>
+                    <h2>Hooks</h2>
+                    <ul>
+                        <li>Hooks are scripts that are executed when various "events" are triggered.</li>
+                        <li>These scripts can be placed in the <code>.git/hooks</code> directory under the repository</li>
+                        <li>Some common use cases are running the code through a linter on <code>pre-commit</code> or tagging information on an issue tracker on <code>git post-receive</code></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>So In Conclusion</h2>
+                    <pre><code>alias yolo="git commit -am 'Deal with it' &amp;&amp; git push --force"</code></pre>
+                </section>
+
+                <section>
+                    <h1>Questions?</h1>
+                </section>
+            </div>
+
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.min.js"></script>
+
+        <script>
+
+            // Full list of configuration options available here:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: true,
+                progress: true,
+                history: true,
+                center: true,
+
+                theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+                transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+                // Optional libraries used to extend on reveal.js
+                dependencies: [
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+                    // { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+                    // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+                ]
+            });
+
+        </script>
+
+    </body>
+</html>
